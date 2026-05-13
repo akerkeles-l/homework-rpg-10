@@ -1,10 +1,6 @@
 package com.narxoz.rpg.quest;
 
-/**
- * Immutable quest entry stored in the guild's quest log.
- */
 public class Quest {
-
     private final String title;
     private final QuestPriority priority;
     private final int rewardGold;
