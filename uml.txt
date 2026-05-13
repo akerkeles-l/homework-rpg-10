@@ -1,0 +1,212 @@
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            ITERATOR PATTERN                                  │
+│                         Quest Log Traversal System                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌─────────────────┐
+                              │ <<interface>>   │
+                              │ QuestIterator   │
+                              ├─────────────────┤
+                              │ +hasNext(): bool│
+                              │ +next(): Quest  │
+                              └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+        ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐
+        │ OrderedQuest      │ │ ReverseQuest      │ │ PriorityQuest     │
+        │ Iterator          │ │ Iterator          │ │ Iterator          │
+        ├───────────────────┤ ├───────────────────┤ ├───────────────────┤
+        │ -snapshot:List    │ │ -snapshot:List    │ │ -snapshot:List    │
+        │ -cursor:int       │ │ -cursor:int       │ │ -cursor:int       │
+        ├───────────────────┤ ├───────────────────┤ ├───────────────────┤
+        │ +hasNext():bool   │ │ +hasNext():bool   │ │ +hasNext():bool   │
+        │ +next():Quest     │ │ +next():Quest     │ │ +next():Quest     │
+        └───────────────────┘ └───────────────────┘ └───────────────────┘
+                    │                  │                  │
+                    └──────────────────┼──────────────────┘
+                                       │
+                                       ▼
+                    ┌─────────────────────────────────────┐
+                    │           RewardSortedQuest         │
+                    │           Iterator (NEW)            │
+                    ├─────────────────────────────────────┤
+                    │ -snapshot:List                      │
+                    │ -cursor:int                         │
+                    ├─────────────────────────────────────┤
+                    │ +hasNext():bool                     │
+                    │ +next():Quest                       │
+                    └─────────────────────────────────────┘
+
+                              ┌─────────────────┐
+                              │    QuestLog     │
+                              │   (Aggregate)   │
+                              ├─────────────────┤
+                              │ -quests:List    │
+                              ├─────────────────┤
+                              │ +add(q):void    │
+                              │ +size():int     │
+                              │ +ordered():QI   │
+                              │ +reverse():QI   │
+                              │ +priorityAtLeast(t):QI│
+                              │ +rewardSorted():QI│
+                              │ #snapshot():List│
+                              └────────┬────────┘
+                                       │
+                                       │ contains
+                                       ▼
+                              ┌─────────────────┐
+                              │     Quest       │
+                              ├─────────────────┤
+                              │ -title:String   │
+                              │ -priority:QP    │
+                              │ -rewardGold:int │
+                              │ -urgent:bool    │
+                              ├─────────────────┤
+                              │ +getters...     │
+                              └────────┬────────┘
+                                       │
+                                       │ uses
+                                       ▼
+                              ┌─────────────────┐
+                              │ <<enum>>        │
+                              │ QuestPriority   │
+                              ├─────────────────┤
+                              │ LOW             │
+                              │ NORMAL          │
+                              │ HIGH            │
+                              │ URGENT          │
+                              └─────────────────┘
+
+
+
+
+
+
+
+
+
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            MEDIATOR PATTERN                                  │
+│                         Guild Hall Communication System                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌─────────────────┐
+                              │ <<interface>>   │
+                              │ GuildMediator   │
+                              ├─────────────────┤
+                              │ +register(m):void│
+                              │ +dispatch(t,f,p):void│
+                              └────────┬────────┘
+                                       │
+                                       │ implements
+                                       ▼
+                    ┌─────────────────────────────────────┐
+                    │           GuildHall                  │
+                    │          (Mediator)                  │
+                    ├─────────────────────────────────────┤
+                    │ -membersByTopic:Map<String,List>    │
+                    ├─────────────────────────────────────┤
+                    │ +register(member):void               │
+                    │ +dispatch(topic,from,payload):void   │
+                    │ #addSubscriber(topic,member):void    │
+                    │ #subscribersFor(topic):List          │
+                    └────────┬────────────────────────────┘
+                             │
+                             │ mediates between
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ <<abstract>>  │    │ <<abstract>>  │    │ <<abstract>>  │
+│ GuildMember   │    │ GuildMember   │    │ GuildMember   │
+│ (Colleague)   │    │ (Colleague)   │    │ (Colleague)   │
+├───────────────┤    ├───────────────┤    ├───────────────┤
+│ -name:String  │    │ -name:String  │    │ -name:String  │
+│ -mediator:GM  │    │ -mediator:GM  │    │ -mediator:GM  │
+├───────────────┤    ├───────────────┤    ├───────────────┤
+│ +receive(t,f,p)│   │ +receive(t,f,p)│   │ +receive(t,f,p)│
+└───────┬───────┘    └───────┬───────┘    └───────┬───────┘
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ Quartermaster │    │    Scout      │    │    Healer     │
+├───────────────┤    ├───────────────┤    ├───────────────┤
+│+requestSupplies│   │+reportRoute() │    │+prepareAid()  │
+│ (t,p):void    │    │ (t,p):void    │    │ (t,p):void    │
+├───────────────┤    ├───────────────┤    ├───────────────┤
+│+receive():void│    │+receive():void│    │+receive():void│
+└───────────────┘    └───────────────┘    └───────────────┘
+
+┌───────────────┐    ┌───────────────┐
+│   Captain     │    │  Loremaster   │
+│               │    │    (NEW)      │
+├───────────────┤    ├───────────────┤
+│+issueOrder()  │    │+shareLore()   │
+│ (t,p):void    │    │ (t,p):void    │
+├───────────────┤    ├───────────────┤
+│+receive():void│    │+receive():void│
+└───────────────┘    └───────────────┘
+
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         COMPLETE RPG GUILD SYSTEM                            │
+│                    Iterator + Mediator Pattern Integration                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────┐     ┌─────────────────────────────────────────┐
+│    ITERATOR PATTERN SIDE    │     │        MEDIATOR PATTERN SIDE            │
+│                             │     │                                         │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────────────┐     │
+│  │     QuestLog        │    │     │    │       GuildHall             │     │
+│  │   (Aggregate)       │    │     │    │       (Mediator)            │     │
+│  └──────────┬──────────┘    │     │    └─────────────┬───────────────┘     │
+│             │               │     │                  │                     │
+│             │ creates       │     │                  │ registers           │
+│             ▼               │     │                  ▼                     │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────────────┐     │
+│  │   QuestIterator     │    │     │    │       GuildMember           │     │
+│  │   <<interface>>     │    │     │    │       (Colleague)            │     │
+│  └──────────┬──────────┘    │     │    └─────────────┬───────────────┘     │
+│             │               │     │                  │                     │
+│             │ implements    │     │                  │ extends             │
+│             ▼               │     │                  ▼                     │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────────────┐     │
+│  │ -OrderedIterator    │    │     │    │ -Quartermaster              │     │
+│  │ -ReverseIterator    │    │     │    │ -Scout                       │     │
+│  │ -PriorityIterator   │    │     │    │ -Healer                      │     │
+│  │ -RewardIterator     │    │     │    │ -Captain                     │     │
+│  └─────────────────────┘    │     │    │ -Loremaster (NEW)            │     │
+│                             │     │    └─────────────────────────────┘     │
+└─────────────────────────────┘     └─────────────────────────────────────────┘
+                    │                                         │
+                    │                                         │
+                    └──────────────┬──────────────────────────┘
+                                   │
+                                   ▼
+                    ┌─────────────────────────────────────────┐
+                    │           CouncilEngine                 │
+                    │         (Orchestrator)                  │
+                    ├─────────────────────────────────────────┤
+                    │ +runCouncil(party, questLog, hall)      │
+                    │         : CouncilRunResult              │
+                    └────────────────────┬────────────────────┘
+                                         │
+                                         │ uses
+                                         ▼
+                    ┌─────────────────────────────────────────┐
+                    │              Main (Demo)                │
+                    ├─────────────────────────────────────────┤
+                    │ +main(args):void                        │
+                    │                                         │
+                    │ 1. Create Heroes                       │
+                    │ 2. Build QuestLog with 5+ quests       │
+                    │ 3. Register 4+ GuildMembers           │
+                    │ 4. Run CouncilEngine                   │
+                    │ 5. Print Results                       │
+                    └─────────────────────────────────────────┘
